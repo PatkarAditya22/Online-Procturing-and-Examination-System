@@ -21,6 +21,7 @@
         </div>
         <div>
             <div @click="isTestStartedFunc"> Start Test</div>
+            <div @click="endUpload">End Upload</div>
         </div>
         <div class="col-md-4">
             <video autoplay class="float"/>
@@ -85,15 +86,16 @@ export default {
                 return false;
             }
         });
-        this.socket = io("http://152.67.10.242/server/stream");
+        this.socket = io("http://crazyforms.herokuapp.com/stream");
         let $ = this;
         let ss = this.socket;
         ss.on("connect", () => {
             $.socketId = ss.io.engine.id;
             ss.emit("subscribe", {
-                testId: $.test.testId,
+                methodName: "proctoring",
+                room: $.test.testId,
                 userId: $.userId,
-                upload: true,
+                upload:true,
                 socketId: $.socketId,
             });
             // ss.on("host-leave",() => {
@@ -140,10 +142,11 @@ export default {
                 console.log(this.socket.connected);
                 if(this.socket.connected){
                 this.socket.emit("data_available", {
-                    testId: $.test.testId,
+                    methodName: "proctoring",
+                    room: $.test.testId,
                     userId: $.userId,
-                    upload: true,
                     socketId: $.socketId,
+                    upload:true,
                     chunk: event.data
                 });
                 } else {
@@ -160,9 +163,11 @@ export default {
             this.mediaRecorder.stop();
             this.uploadEnded = true;
             this.socket.emit("leave-upload", {
-                testId: $.test.testId,
+                methodName: "proctoring",
+                room: $.test.testId,
                 userId: $.userId,
-                upload: true,
+                socketId: $.socketId,
+                upload:true,
                 socketId: $.socketId 
             }); 
             if(this.videoRecordingStream){
@@ -242,13 +247,17 @@ export default {
                 video.onloadeddata = () => {
                     let ss = $.socket;
                     ss.emit("subscribe-upload", {
-                        testId: $.testId,
+                        methodName: "proctoring",
+                        room: $.test.testId,
                         userId: $.userId,
-                        upload: true,
-                        socketId: $.socketId 
+                        socketId: $.socketId, 
+                        upload:true
                     });
-                    let mediaRecorder = new MediaRecorder(video.captureStream(25),{mimeType: "video/webm; codecs=vp9"});
-                    mediaRecorder.ondataavailable = this.handleDataAvailable;
+                    let mediaRecorder = new MediaRecorder(result[0]);
+                    $.mediaRecorder = mediaRecorder;
+                    $.mediaRecorder.start(1000);
+                    $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
+                    console.log($.mediaRecorder);
                     startPrediction();
                     setInterval(()=>{
                         $.time += 1;
