@@ -1,10 +1,56 @@
 <template>
+<<<<<<< Updated upstream
     <div>
         <div v-if="isLoading">
             <div class="spinner-border text-primary" role="status">
                 <span class="sr-only">Loading...</span>
+||||||| merged common ancestors
+    <div> 
+        <div v-if="isTestStarted && !testEnded" class="row">
+            <div class="col-md-6">
+                <base-card v-for="(question,index) in test" :key="index" style="width: 18rem;">
+                    <div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ question.questionText }}</h5>
+                        </div>
+                        <div v-if="question.type=='single'">
+                            <ul class="list-group list-group-flush" v-for="(option,index) in question.options" :key="index">
+                            <li class="list-group-item">{{ option }}</li>
+                        </ul>
+                        </div>
+                        <div v-else>
+                            <textarea name="" id="" cols="10" rows="5"></textarea>
+                        </div>
+                    </div>
+                </base-card>
+=======
+    <div> 
+        <div v-if="isTestStarted && !testEnded" class="row">
+            <div class="col-md-10 w-100">
+                <base-card v-for="(question,index) in test.questions" :key="index" style="width: 18rem;">
+                    <div>
+                        <div class="card-body">
+                            <h5 class="card-title">Q. {{ question.questionText }}</h5>
+                        </div>
+                        <div v-if="question.qType=='single'">
+                            <div v-for="(option,index) in question.options" :key="index">
+                                <input type="radio" name="" id=""> {{ option }}
+                            </div>
+                        </div>
+                        <div v-else-if="question.qType=='multiple'">
+                            <div v-for="(option,index) in question.options" :key="index">
+                                <input type="checkbox" name="" id=""> {{ option }}
+                            </div>
+                        </div>
+                        <div v-else>
+                            <textarea name="" id="" cols="60" rows="30"></textarea>
+                        </div>
+                    </div>
+                </base-card>
+>>>>>>> Stashed changes
             </div>
         </div>
+<<<<<<< Updated upstream
         <div> 
             <div v-if="isTestStarted && !testEnded" class="row">
                 <div class="col-md-6">
@@ -32,6 +78,22 @@
             <div class="col-md-4">
                 <video autoplay class="float"/>
             </div>
+||||||| merged common ancestors
+        <div>
+            <div @click="isTestStartedFunc"> Start Test</div>
+            <div @click="endUpload">End Upload</div>
+        </div>
+        <div class="col-md-4">
+            <video autoplay class="float"/>
+        </div>
+=======
+        <div>
+            <div @click="isTestStartedFunc"> Start Test</div>
+        </div>
+        <div class="col-md-4">
+            <video autoplay class="float"/>
+        </div>
+>>>>>>> Stashed changes
         </div>
     </div>
 </template>
@@ -66,8 +128,56 @@ export default {
         let all_tests = this.$store.getters.getUserTests;
         this.test = all_tests.filter(test =>{
             return test._id === this.testId;
+<<<<<<< Updated upstream
         })
         console.log(this.test);      
+||||||| merged common ancestors
+        })
+        console.log(this.test);
+        // this.test = [
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [0],
+        //         type: 'single'
+        //     },
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [2],
+        //         type: 'single'
+        //     },
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [1],
+        //         type: 'text'
+        //     },
+        // ];        
+=======
+        });
+        console.log(this.test);
+        // this.test = [
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [0],
+        //         type: 'single'
+        //     },
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [2],
+        //         type: 'single'
+        //     },
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [1],
+        //         type: 'text'
+        //     },
+        // ];        
+>>>>>>> Stashed changes
     },
     mounted(){
         const hdConstraints = {
@@ -85,16 +195,15 @@ export default {
                 return false;
             }
         });
-        this.socket = io("http://crazyforms.herokuapp.com/stream");
+        this.socket = io("http://152.67.10.242/server/stream");
         let $ = this;
         let ss = this.socket;
         ss.on("connect", () => {
             $.socketId = ss.io.engine.id;
             ss.emit("subscribe", {
-                methodName: "proctoring",
-                room: $.test.testId,
+                testId: $.test.testId,
                 userId: $.userId,
-                upload:true,
+                upload: true,
                 socketId: $.socketId,
             });
         });
@@ -142,11 +251,10 @@ export default {
             if (event.data.size > 0) {
                 if(this.socket.connected){
                 this.socket.emit("data_available", {
-                    methodName: "proctoring",
-                    room: $.test.testId,
+                    testId: $.test.testId,
                     userId: $.userId,
+                    upload: true,
                     socketId: $.socketId,
-                    upload:true,
                     chunk: event.data
                 });
                 } else {
@@ -163,11 +271,9 @@ export default {
             this.mediaRecorder.stop();
             this.uploadEnded = true;
             this.socket.emit("leave-upload", {
-                methodName: "proctoring",
-                room: $.test.testId,
+                testId: $.test.testId,
                 userId: $.userId,
-                socketId: $.socketId,
-                upload:true,
+                upload: true,
                 socketId: $.socketId 
             }); 
             if(this.videoRecordingStream){
@@ -246,16 +352,26 @@ export default {
                 video.onloadeddata = () => {
                     let ss = $.socket;
                     ss.emit("subscribe-upload", {
-                        methodName: "proctoring",
-                        room: $.test.testId,
+                        testId: $.testId,
                         userId: $.userId,
-                        socketId: $.socketId, 
-                        upload:true
+                        upload: true,
+                        socketId: $.socketId 
                     });
+<<<<<<< Updated upstream
                     let mediaRecorder = new MediaRecorder(result[0]);
                     $.mediaRecorder = mediaRecorder;
                     $.mediaRecorder.start(1000);
                     $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
+||||||| merged common ancestors
+                    let mediaRecorder = new MediaRecorder(result[0]);
+                    $.mediaRecorder = mediaRecorder;
+                    $.mediaRecorder.start(1000);
+                    $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
+                    console.log($.mediaRecorder);
+=======
+                    let mediaRecorder = new MediaRecorder(video.captureStream(25),{mimeType: "video/webm; codecs=vp9"});
+                    mediaRecorder.ondataavailable = this.handleDataAvailable;
+>>>>>>> Stashed changes
                     startPrediction();
                     setInterval(()=>{
                         $.time += 1;

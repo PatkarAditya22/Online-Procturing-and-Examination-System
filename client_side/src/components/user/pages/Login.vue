@@ -57,6 +57,7 @@ export default {
                 email: this.email,
                 password: this.password,
             });
+            console.log(response);
             this.$store.commit('setUser',{
                 user: response.user
             });

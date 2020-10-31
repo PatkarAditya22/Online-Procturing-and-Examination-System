@@ -33,6 +33,7 @@ export default {
     },
     async created(){
         const response = await Api.getAllUserTests();
+        console.log(response);
         this.tests = response.data.tests;
         this.$store.commit('setUserTests',{ userTests: this.tests });
         console.log(this.tests);

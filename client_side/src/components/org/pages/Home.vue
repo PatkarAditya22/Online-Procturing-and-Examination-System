@@ -1,6 +1,7 @@
 <template>
     <div class="container mx-auto mt-3">
         <div>
+            hello
             <div v-for="test in tests" :key="test._id">
                 <base-card class="p-3">
                     <div class="row">
