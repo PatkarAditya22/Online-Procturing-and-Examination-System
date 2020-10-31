@@ -134,6 +134,7 @@ export default {
             });
             this.$store.commit('setAuthentication', { isAuthenticated: true });
             this.$store.commit('setRole',{ role: 'org' });
+            this.$router.replace('/org/home');
         },
     },
 }

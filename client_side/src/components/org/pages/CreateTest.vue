@@ -39,7 +39,7 @@
                             <option value="text">Text Area</option>
                         </select>
                         <div class="mt-2">
-                            <input type="text" class="form-control" placeholder="Enter score" v-model.trim="newQuestion.score">
+                            <input type="text" class="form-control" placeholder="Enter score" v-model.number="newQuestion.score">
                         </div>
                     </div>
                 </div>
@@ -83,7 +83,7 @@
                     </div>
                     <div style="display:flex;">
                         <label style="margin:10px;" for="inputEmail3">Toat Score</label>
-                        <input style="margin:10px;width:100px" type="text" class="form-control" id="inputEmail3" v-model="test.settings.totalScore">
+                        <input style="margin:10px;width:100px" type="text" class="form-control" id="inputEmail3" v-model.number="test.settings.totalScore">
                     </div>
                     <!-- <div class="col-md-4">
                         <div class="form-check">
@@ -213,6 +213,18 @@ export default {
         async createTest(){
             if(this.test.testName === '' || this.test.questions.length === null)
                 return;
+            let ts = this.test.settings.totalScore;
+            console.log(ts);
+            let sum=0;
+            this.test.questions.forEach(question => {
+                console.log(question.score);
+                sum+=question.score;
+            });
+            console.log(sum);
+            if(ts!=sum){
+                alert('Total score does not match sum of question score!');
+                return;
+            }
             const response = await Api.createTest(this.test);
             console.log(response);
         }

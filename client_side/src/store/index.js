@@ -6,7 +6,9 @@ export default createStore({
             user: null,
             role:null,
             isAuthenticated: null,
-            baseUrl: 'http://localhost:3000/api/'
+            baseUrl: 'http://localhost:3000/api/',
+            tests: null,
+            userTests: null,
         }
     },
     getters: {
@@ -21,6 +23,12 @@ export default createStore({
         },
         getBaseUrl(state){
             return state.baseUrl;
+        },
+        getTests(state){
+            return state.tests;
+        },
+        getUserTests(state){
+            return state.userTests;
         }
     },
     mutations: {
@@ -32,6 +40,12 @@ export default createStore({
         },
         setRole(state,payload){
             state.role = payload.role;
+        },
+        setTests(state,payload){
+            state.tests = payload.tests;
+        },
+        setUserTests(state,payload){
+            state.userTests = payload.userTests;
         }
     },
 });

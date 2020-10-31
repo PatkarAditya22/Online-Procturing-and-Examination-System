@@ -39,5 +39,9 @@ export default {
     getAllTests(){
         const response = Api().get('org/get_all_tests');
         return response;
+    },
+    getAllUserTests(){
+        const response = Api().get('user/get_all_tests');
+        return response;
     }
 }

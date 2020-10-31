@@ -85,16 +85,16 @@ export default {
                 return false;
             }
         });
-        this.socket = io("url");
+        this.socket = io("http://152.67.10.242/server/stream");
         let $ = this;
         let ss = this.socket;
         ss.on("connect", () => {
-            this.socketId = ss.io.engine.id;
+            $.socketId = ss.io.engine.id;
             ss.emit("subscribe", {
-                testId: this.test.testId,
-                userId: this.userId,
+                testId: $.test.testId,
+                userId: $.userId,
                 upload: true,
-                socketId: this.socketId
+                socketId: $.socketId,
             });
             // ss.on("host-leave",() => {
             //     console.log("hostleft")
@@ -140,7 +140,7 @@ export default {
                 console.log(this.socket.connected);
                 if(this.socket.connected){
                 this.socket.emit("data_available", {
-                    testId: $.testId,
+                    testId: $.test.testId,
                     userId: $.userId,
                     upload: true,
                     socketId: $.socketId,
@@ -160,7 +160,7 @@ export default {
             this.mediaRecorder.stop();
             this.uploadEnded = true;
             this.socket.emit("leave-upload", {
-                testId: $.testId,
+                testId: $.test.testId,
                 userId: $.userId,
                 upload: true,
                 socketId: $.socketId 
@@ -252,7 +252,6 @@ export default {
                     startPrediction();
                     setInterval(()=>{
                         $.time += 1;
-                        console.log($.time);
                         console.log($.logs);
                     }, 60*1000);
                 };

@@ -147,16 +147,16 @@ export default {
             if(!this.isValid)
                 return;
             const formData = new FormData();
-            formData.append('user',{
-                username: this.username,
-                fullName: this.fullName,
-                email: this.email,
-                password: this.password,
-                contactNum: this.contact,
-                city: this.city
-            })
-            formData.append('idProof',this.uploadFile);
+            
+            formData.append('name',this.username);
+            formData.append('username',this.fullName);
+            formData.append('email',this.email);
+            formData.append('password',this.password);
+            formData.append('contactNum',this.contact);
+            formData.append('city',this.city);
             formData.append('picture',this.picture);
+            formData.append('file',this.uploadFile);
+            
             const response = await Api.registerUser(formData);
             localStorage.setItem("token",response.token);
             console.log(response);
@@ -165,6 +165,7 @@ export default {
             });
             this.$store.commit('setAuthenticated', { isAuthenticated: true });
             this.$store.commit('setRole',{ role: 'user' });
+            this.$router.replace('/user/home');
         },
         onUploadFile(){
             this.uploadFile = this.$refs.file.files[0];
