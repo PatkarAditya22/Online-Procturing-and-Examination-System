@@ -5,7 +5,8 @@ export default createStore({
         return {
             user: null,
             role:null,
-            isAuthenticated: null
+            isAuthenticated: null,
+            baseUrl: 'http://localhost:3000/api/'
         }
     },
     getters: {
@@ -17,6 +18,9 @@ export default createStore({
         },
         getRole(state){
             return state.role;
+        },
+        getBaseUrl(state){
+            return state.baseUrl;
         }
     },
     mutations: {
@@ -30,18 +34,4 @@ export default createStore({
             state.role = payload.role;
         }
     },
-    actions: {
-        async registerUser(context,payload){
-            
-        },
-        async registerOrg(context,payload){
-            
-        },
-        async loginUser(context,payload){
-
-        },
-        async loginOrg(context,payload){
-            
-        },
-    }
 });

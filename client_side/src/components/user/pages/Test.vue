@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <div v-if="isTestStarted" class="row">
+    <div> 
+        <div v-if="isTestStarted && !testEnded" class="row">
             <div class="col-md-6">
                 <base-card v-for="(question,index) in test" :key="index" style="width: 18rem;">
                     <div>
@@ -19,13 +19,13 @@
                 </base-card>
             </div>
         </div>
-        <div v-else>
+        <div>
             <div @click="isTestStartedFunc"> Start Test</div>
         </div>
         <div class="col-md-4">
-            <video autoplay/>
+            <video autoplay class="float"/>
         </div>
-    </div>
+        </div>
 </template>
 
 <script>
@@ -33,6 +33,7 @@ import "@tensorflow/tfjs-backend-cpu";
 import "@tensorflow/tfjs-backend-webgl";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
+import io from "socket.io-client";
 
 export default {
     props: ['testId'],
@@ -41,12 +42,16 @@ export default {
     },
     data(){
         return {
+            time:0,
             test: null,
             testEnded:false,
             result: null,
             isLoading:true,
             isTestStarted: false,
-            redFlags: 3
+            redFlags: 3,
+            socketId: null,
+            mediaRecorder: null,
+            logs:{}
         }
     },
     created(){
@@ -72,7 +77,34 @@ export default {
         ];        
     },
     mounted(){
-        
+        document.addEventListener('keydown',function(e){
+            console.log(e.keyCode);
+            var charCode = e.charCode || e.keyCode || e.which;
+            if (charCode == 27){
+                console.log('escape');
+                return false;
+            }
+        });
+        this.socket = io("url");
+        let $ = this;
+        let ss = this.socket;
+        ss.on("connect", () => {
+            this.socketId = ss.io.engine.id;
+            ss.emit("subscribe", {
+                testId: this.test.testId,
+                userId: this.userId,
+                upload: true,
+                socketId: this.socketId
+            });
+            // ss.on("host-leave",() => {
+            //     console.log("hostleft")
+            //     if($.mediaRecorder&&!$.uploadEnded){
+            //         $.endUpload();
+            //     }
+            //     ss.disconnect();
+            //     this.$router.push("/");
+            // })
+        });
     },
     methods:{
         isTestStartedFunc(){
@@ -81,14 +113,12 @@ export default {
                 console.log(document.visibilityState);
             });
             document.onkeypress = function(evt){console.log(evt)};
-            document.documentElement.requestFullscreen().the(()=>{
+            document.documentElement.requestFullscreen().then(()=>{
                 $.isTestStarted = true;
                 $.startTest();
             }).catch(err => {
                 alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
             });
-            document.documentElement.requestFullscreen();
-            // document.onfullscreenchange = this.endTest;
         },
         calculateError(iris) {
             let sumX = -iris[0][0];
@@ -103,7 +133,55 @@ export default {
             this.testEnded = true;
             console.log('khatam');
         },
+        handleDataAvailable(event) {
+            let $ = this;
+            console.log("data-available");
+            if (event.data.size > 0) {
+                console.log(this.socket.connected);
+                if(this.socket.connected){
+                this.socket.emit("data_available", {
+                    testId: $.testId,
+                    userId: $.userId,
+                    upload: true,
+                    socketId: $.socketId,
+                    chunk: event.data
+                });
+                } else {
+                    alert('Socket disconnnected! Some error occured. Please retry the upload')
+                    this.mediaRecorder.stop();
+                }
+            } else {
+                // ...
+            }
+        },
+        endUpload() {
+            let $ = this;
+            console.log('upload ended');
+            this.mediaRecorder.stop();
+            this.uploadEnded = true;
+            this.socket.emit("leave-upload", {
+                testId: $.testId,
+                userId: $.userId,
+                upload: true,
+                socketId: $.socketId 
+            }); 
+            if(this.videoRecordingStream){
+                const tracks = this.videoRecordingStream.getTracks();
+                tracks.forEach(function(track) {
+                track.stop();
+                });
+                this.videoRecordingStream = null;
+            }
+            if(this.screenRecordingStream){
+                const tracks = this.screenRecordingStream.getTracks();
+                tracks.forEach(function(track) {
+                track.stop();
+                });
+                this.screenRecordingStream = null;
+            }
+        },
         startTest(){
+            let $ = this;
             const hdConstraints = {
                 video: true
             };
@@ -153,10 +231,31 @@ export default {
                         })
                 }
                 const startPrediction = async() => {
-                    console.log(await predict());
+                    const result = await predict();
+                    if(!this.logs[this.time])this.logs[this.time]=[0,0,0,0];
+                    this.logs[this.time][0] += result.lookedAway?1:0;
+                    this.logs[this.time][1] += result.numberOfPeople>1?1:0;
+                    this.logs[this.time][2] += result.confidence<0.8?1:0;
+                    this.logs[this.time][3] += result.mobile?1:0;
                     if(!this.testEnded)requestAnimationFrame(startPrediction);
                 }
-                video.onloadeddata = () => startPrediction();
+                video.onloadeddata = () => {
+                    let ss = $.socket;
+                    ss.emit("subscribe-upload", {
+                        testId: $.testId,
+                        userId: $.userId,
+                        upload: true,
+                        socketId: $.socketId 
+                    });
+                    let mediaRecorder = new MediaRecorder(video.captureStream(25),{mimeType: "video/webm; codecs=vp9"});
+                    mediaRecorder.ondataavailable = this.handleDataAvailable;
+                    startPrediction();
+                    setInterval(()=>{
+                        $.time += 1;
+                        console.log($.time);
+                        console.log($.logs);
+                    }, 60*1000);
+                };
                 this.isLoading = false;
             }).catch(err => console.log(err));
         },
@@ -165,5 +264,17 @@ export default {
 </script>
 
 <style scoped>
-
+.float{
+	position:fixed;
+	width:250px;
+	height:200px;
+	bottom:40px;
+	right:40px;
+	color:#FFF;
+	border-radius:10px;
+	text-align:center;
+    font-size:30px;
+	box-shadow: 2px 2px 3px #999;
+    z-index:100;
+}
 </style>

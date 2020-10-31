@@ -23,6 +23,11 @@
                     <p class="text error">{{ contactError }}</p>
                 </div>
                 <div class="form-group">
+                    <label for="contact">City</label>
+                    <input type="text" class="form-control" id="city" aria-describedby="cityHel" placeholder="Enter city name" v-model.trim="city">
+                    <p class="text error">{{ cityError }}</p>
+                </div>
+                <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" class="form-control" id="password" placeholder="Password" v-model.trim="password">
                     <p class="text error">{{ passwordError }}</p>
@@ -37,13 +42,19 @@
                     <input type="file" class="form-control" id="uploadFile" ref="file" @change="onUploadFile">
                     <p class="text error">{{ uploadFileError }}</p>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary" @click="submit">Submit</button>
             </form>
         </base-card>
+        <video id="webcam" autoplay playsinline width="640" height="480"></video>
+        <canvas id="canvas" class="d-none"></canvas>
+        <div @click="Capture">Capture</div>
     </div>
 </template>
 
 <script>
+import Api from '../../../utils/api';
+import Webcam from 'webcam-easy';
+
 export default {
     data(){
         return {
@@ -51,6 +62,7 @@ export default {
             fullName: '',
             email:'',
             contact: '',
+            city: '',
             password: '',
             confirmPassword: '',
             uploadFile: null,
@@ -58,10 +70,13 @@ export default {
             fullNameError: '',
             emailError: '',
             contactError: '',
+            cityError: '',
             passwordError: '',
             confirmPasswordError: '',
             uploadFileError: '',
-            isValid: true
+            isValid: true,
+            webcam:null,
+            string:null
         }
     },
     methods: {
@@ -73,6 +88,7 @@ export default {
             this.passwordError = '';
             this.confirmPasswordError = '';
             this.uploadFileError = '';
+            this.cityError = '';
         },
         resetInputs(){
             this.username = '';
@@ -82,6 +98,7 @@ export default {
             this.password = '';
             this.confirmPassword = '';
             this.uploadFile = '';
+            this.city = '';
         },
         validate(){
             this.isValid = true;
@@ -107,6 +124,11 @@ export default {
                 this.contactError = 'Please enter your phone number';
                 this.isValid = false;
             }
+            if(this.city === ''){
+                this.cityErorr = 'Please enter your city name';
+                this.isValid = false;
+            }
+
             if(this.password==='' || this.password.length < 8){
                 this.passwordError = 'Please enter a valid password';
                 this.isValid = false;
@@ -120,18 +142,52 @@ export default {
                 this.isValid = false;
             }
         },
-        submit() {
+        async submit() {
             this.validate();
             if(!this.isValid)
                 return;
-            // user register api endpoint
             const formData = new FormData();
+            formData.append('user',{
+                username: this.username,
+                fullName: this.fullName,
+                email: this.email,
+                password: this.password,
+                contactNum: this.contact,
+                city: this.city
+            })
             formData.append('idProof',this.uploadFile);
-            alert(this.uploadFile);
+            formData.append('picture',this.picture);
+            const response = await Api.registerUser(formData);
+            localStorage.setItem("token",response.token);
+            console.log(response);
+            this.$store.commit('setUser',{
+                user: response.user
+            });
+            this.$store.commit('setAuthenticated', { isAuthenticated: true });
+            this.$store.commit('setRole',{ role: 'user' });
         },
         onUploadFile(){
             this.uploadFile = this.$refs.file.files[0];
+        },
+        Capture(){
+            let picture = this.webcam.snap();
+            this.picture = picture;  
+            this.webcam.stop();   
         }
+    },
+    mounted(){
+        const webcamElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('canvas');
+        const webcam = new Webcam(webcamElement, 'user', canvasElement, null);
+        this.webcam = webcam;
+        console.log(webcam);
+        webcam.start()
+        .then(result =>{
+            console.log("webcam started");
+        })
+        .catch(err => {
+            console.log(err);
+        });
     }
 }
 </script>

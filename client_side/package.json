@@ -13,11 +13,15 @@
     "@tensorflow/tfjs-backend-webgl": "^2.7.0",
     "@tensorflow/tfjs-converter": "^2.7.0",
     "@tensorflow/tfjs-core": "^2.7.0",
+    "@vladmandic/face-api": "^0.8.6",
     "axios": "^0.21.0",
     "core-js": "^3.6.5",
+    "face-api.js": "^0.22.2",
+    "socket.io-client": "^2.3.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
-    "vuex": "^4.0.0-0"
+    "vuex": "^4.0.0-0",
+    "webcam-easy": "^1.0.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

@@ -50,7 +50,7 @@ export default {
             this.validate();
             if(!this.isFormValid)
                 return;
-            this.$emit('submit',this.email,this.password);
+            this.$emit('submitLogin',this.email,this.password);
         }
     }
 }
