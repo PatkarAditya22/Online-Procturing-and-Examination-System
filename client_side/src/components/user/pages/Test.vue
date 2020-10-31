@@ -55,26 +55,31 @@ export default {
         }
     },
     created(){
-        this.test = [
-            {
-                questionText: "How are you?",
-                options: ['fine','good','great'],
-                correctOptions: [0],
-                type: 'single'
-            },
-            {
-                questionText: "How are you?",
-                options: ['fine','good','great'],
-                correctOptions: [2],
-                type: 'single'
-            },
-            {
-                questionText: "How are you?",
-                options: ['fine','good','great'],
-                correctOptions: [1],
-                type: 'text'
-            },
-        ];        
+        let all_tests = this.$store.getters.getUserTests;
+        this.test = all_tests.filter(test =>{
+            return test._id === this.testId;
+        })
+        console.log(this.test);
+        // this.test = [
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [0],
+        //         type: 'single'
+        //     },
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [2],
+        //         type: 'single'
+        //     },
+        //     {
+        //         questionText: "How are you?",
+        //         options: ['fine','good','great'],
+        //         correctOptions: [1],
+        //         type: 'text'
+        //     },
+        // ];        
     },
     mounted(){
         document.addEventListener('keydown',function(e){

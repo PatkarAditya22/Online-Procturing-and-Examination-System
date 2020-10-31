@@ -36,6 +36,7 @@ export default {
         this.tests = response.data.tests;
         this.$store.commit('setUserTests',{ userTests: this.tests });
         console.log(this.tests);
+        // console.log(this.tests);
         // this.tests = [
         //     {
         //         testName: "JEE Advanced",

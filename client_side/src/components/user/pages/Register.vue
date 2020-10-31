@@ -156,7 +156,7 @@ export default {
             formData.append('city',this.city);
             formData.append('picture',this.picture);
             formData.append('file',this.uploadFile);
-            
+
             const response = await Api.registerUser(formData);
             localStorage.setItem("token",response.token);
             console.log(response);

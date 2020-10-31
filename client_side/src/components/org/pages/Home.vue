@@ -1,8 +1,5 @@
 <template>
     <div class="container mx-auto mt-3">
-        <!-- <div v-if="testsPresent">
-            No tests found
-        </div> -->
         <div>
             <div v-for="test in tests" :key="test._id">
                 <base-card class="p-3">
@@ -32,12 +29,7 @@ export default {
     },
     methods : {
         nextPage(testId){
-            this.$router.push({path:`/org/test/{testId}/summary`,params:{}})
-        }
-    },
-    computed: {
-        testsPresent(){
-            return this.tests.length === 0;
+            this.$router.push(`/org/test/${testId}/summary`)
         }
     },
     async created(){
@@ -45,63 +37,7 @@ export default {
         this.tests = response.data.tests;
         this.$store.commit('setTests',{ test: this.tests});
         console.log(this.tests);
-
-        // this.tests = [
-        //     {
-        //         testName: "JEE Advanced",
-        //         testId: 1,
-        //         orgName: 'NCERT',
-        //         testDuration: '3 hrs',
-        //         settings:{},
-        //         questions: [
-        //             {
-        //                 questionText: "What is you name?",
-        //                 options: null,
-        //                 correctOptions: null,
-        //                 type: 'text'
-        //             },
-        //             {
-        //                 questionText: "How are you?",
-        //                 options: ['fine','good','great'],
-        //                 correctOptions: ['great'],
-        //                 type: 'single'
-        //             },
-        //             {
-        //                 questionText: "What is your fav subject?",
-        //                 options: ['AI','IoT','SE','CN'],
-        //                 correctOptions: ['AI','IoT','SE','CN'],
-        //                 type: 'multiple'
-        //             },
-        //         ]
-        //     },
-        //     {
-        //         testName: "JEE Advanced",
-        //         testId: 2,
-        //         orgName: 'NCERT',
-        //         testDuration: '3 hrs',
-        //         settings:{},
-        //         questions: [
-        //             {
-        //                 questionText: "What is you name?",
-        //                 options: null,
-        //                 correctOptions: null,
-        //                 type: 'text'
-        //             },
-        //             {
-        //                 questionText: "How are you?",
-        //                 options: ['fine','good','great'],
-        //                 correctOptions: ['great'],
-        //                 type: 'single'
-        //             },
-        //             {
-        //                 questionText: "What is your fav subject?",
-        //                 options: ['AI','IoT','SE','CN'],
-        //                 correctOptions: ['AI','IoT','SE','CN'],
-        //                 type: 'multiple'
-        //             },
-        //         ]
-        //     }
-        // ]
+        console.log(this.tests[0].testName);
     }
 }
 </script>

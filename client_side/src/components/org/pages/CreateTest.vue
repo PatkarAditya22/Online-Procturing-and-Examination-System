@@ -8,7 +8,7 @@
                 <div class="w-100 row">
                     <div class="col-md-8 ">
                         <input type="text" placeholder="Enter your question" class="form-control mb-3" v-model.trim="newQuestion.questionText">
-                        <div v-if="newQuestion.type === 'single'">
+                        <div v-if="newQuestion.qType === 'single'">
                             
                             <div class="form-row">
                                 <input type="text" class="form-control col-md-8 mr-1" name="" id="" placeholder="Enter new option" v-model.trim="newOption">
@@ -18,7 +18,7 @@
                                 <input type="radio" name="" id="" v-model="newQuestion.correctOptions"> {{ option }}
                             </div>
                         </div>
-                        <div v-else-if="newQuestion.type === 'multiple'">
+                        <div v-else-if="newQuestion.qType === 'multiple'">
                             
                             <div class="form-row">
                                 <input class="form-control col-md-8 mr-2" type="text" name="" id="" placeholder="Enter new option" v-model.trim="newOption">
@@ -33,7 +33,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <select class="custom-select" v-model="newQuestion.type">
+                        <select class="custom-select" v-model="newQuestion.qType">
                             <option value="single" selected>Single Correct</option>
                             <option value="multiple">Multiple Correct</option>
                             <option value="text">Text Area</option>
@@ -85,6 +85,10 @@
                         <label style="margin:10px;" for="inputEmail3">Toat Score</label>
                         <input style="margin:10px;width:100px" type="text" class="form-control" id="inputEmail3" v-model.number="test.settings.totalScore">
                     </div>
+                    <div class="col-md-4">
+                        <input type="file" accept=".csv" ref="file" @change="uploadFile"/>
+                    </div>
+                    <br>
                     <!-- <div class="col-md-4">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
@@ -93,7 +97,6 @@
                             </label>
                         </div>
                     </div> -->
-                    <br>
                     <div class="col-md-4">
                         <select style="width:200px" class="custom-select" v-model="test.settings.severity">
                             <option value="strict" selected>Strict</option>
@@ -115,12 +118,12 @@
                             <div class="row">
                                 <div class="col-md-9">
                                     <h4>Q.{{ i+1 }} {{ question.questionText }}</h4>
-                                    <div v-if="question.type === 'single'">
+                                    <div v-if="question.qType === 'single'">
                                         <div v-for="(option,i) in question.options" :key="i">
                                             <input type="radio" name="" id=""> {{ option }}
                                         </div>
                                     </div>
-                                    <div v-else-if="question.type === 'multiple'">
+                                    <div v-else-if="question.qType === 'multiple'">
                                         <div v-for="(option,i) in question.options" :key="i">
                                             <input type="checkbox" name="" id=""> {{ option }}
                                         </div>
@@ -164,9 +167,13 @@ export default {
             disableTabChange : false,
             enableFullScreen : false,
             testDuration : '',
+            csvFile: null,
         }
     },
     methods:{
+        uploadFile(){
+            this.csvFile = this.$refs.file.files[0];
+        },
         selectTab(tabNum){
             this.currentTab = tabNum;
         },
@@ -175,7 +182,7 @@ export default {
                 questionText: '',
                 options: [],
                 correctOptions: [],
-                type: 'single'
+                qType: 'single'
             };
             this.showDialog = value;
         },
@@ -191,7 +198,7 @@ export default {
             if(this.newQuestion.questionText === ''){
                 isValid = false;
             }
-            if((this.newQuestion.type === 'single' || this.newQuestion.type === 'multiple') && this.newQuestion.options.length === 0){
+            if((this.newQuestion.qType === 'single' || this.newQuestion.qType === 'multiple') && this.newQuestion.options.length === 0){
                 isValid = false;
             }
             if(this.newQuestion.score === 0){
@@ -199,8 +206,8 @@ export default {
             }
             if(isValid){
                 if(this.newQuestion.type === 'text'){
-                    this.newQuestion.options = null;
-                    this.newQuestion.correctOptions = null;
+                    this.newQuestion.options = [];
+                    this.newQuestion.correctOptions = [];
                 }
                 this.test.questions.push(this.newQuestion);
                 this.toggleShowDialog(false);
@@ -225,7 +232,22 @@ export default {
                 alert('Total score does not match sum of question score!');
                 return;
             }
-            const response = await Api.createTest(this.test);
+            if(!this.csvFile){
+                return;
+            }
+            // var reader = new FileReader();
+            // let $ = this;
+            // reader.onload = async function (e) {
+            //     var rows = e.target.result.split("\n");
+            //     console.log(rows);
+            //     $.test.users = rows;
+                
+            // }
+            const formData = new FormData();
+            formData.append('file',this.csvFile);
+            formData.append('test',JSON.stringify(this.test));
+            console.log(this.test);
+            const response = await Api.createTest(formData);
             console.log(response);
         }
     },
@@ -238,11 +260,11 @@ export default {
         this.test = {
             testName: '',
             settings: {
-                'testDuration': '',
-                'disableTabChange': false,
-                'enableFullScreen': false,
-                'severity' : this.severity,
-                'totalScore' : this.totalScore,
+                testDuration: '',
+                disableTabChange: false,
+                enableFullScreen: false,
+                severity : null,
+                totalScore : null,
             }, 
             questions: [
                
