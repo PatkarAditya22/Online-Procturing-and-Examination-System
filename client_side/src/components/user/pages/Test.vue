@@ -1,32 +1,39 @@
 <template>
-    <div> 
-        <div v-if="isTestStarted && !testEnded" class="row">
-            <div class="col-md-6">
-                <base-card v-for="(question,index) in test" :key="index" style="width: 18rem;">
-                    <div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ question.questionText }}</h5>
-                        </div>
-                        <div v-if="question.type=='single'">
-                            <ul class="list-group list-group-flush" v-for="(option,index) in question.options" :key="index">
-                            <li class="list-group-item">{{ option }}</li>
-                        </ul>
-                        </div>
-                        <div v-else>
-                            <textarea name="" id="" cols="10" rows="5"></textarea>
-                        </div>
-                    </div>
-                </base-card>
+    <div>
+        <div v-if="isLoading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
             </div>
         </div>
-        <div>
-            <div @click="isTestStartedFunc"> Start Test</div>
-            <div @click="endUpload">End Upload</div>
+        <div> 
+            <div v-if="isTestStarted && !testEnded" class="row">
+                <div class="col-md-6">
+                    <base-card v-for="(question,index) in test" :key="index" style="width: 18rem;">
+                        <div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ question.questionText }}</h5>
+                            </div>
+                            <div v-if="question.type=='single'">
+                                <ul class="list-group list-group-flush" v-for="(option,index) in question.options" :key="index">
+                                <li class="list-group-item">{{ option }}</li>
+                            </ul>
+                            </div>
+                            <div v-else>
+                                <textarea name="" id="" cols="10" rows="5"></textarea>
+                            </div>
+                        </div>
+                    </base-card>
+                    <div @click="endTest">Submit Test</div>
+                </div>
+            </div>
+            <div v-else-if="!testEnded">
+                <div @click="isTestStartedFunc"> Start Test</div>
+            </div>
+            <div class="col-md-4">
+                <video autoplay class="float"/>
+            </div>
         </div>
-        <div class="col-md-4">
-            <video autoplay class="float"/>
-        </div>
-        </div>
+    </div>
 </template>
 
 <script>
@@ -47,7 +54,7 @@ export default {
             test: null,
             testEnded:false,
             result: null,
-            isLoading:true,
+            isLoading:false,
             isTestStarted: false,
             redFlags: 3,
             socketId: null,
@@ -60,29 +67,16 @@ export default {
         this.test = all_tests.filter(test =>{
             return test._id === this.testId;
         })
-        console.log(this.test);
-        // this.test = [
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [0],
-        //         type: 'single'
-        //     },
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [2],
-        //         type: 'single'
-        //     },
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [1],
-        //         type: 'text'
-        //     },
-        // ];        
+        console.log(this.test);      
     },
     mounted(){
+        const hdConstraints = {
+            video: true
+        };
+        const video = document.querySelector('video');
+        navigator.mediaDevices.getUserMedia(hdConstraints).then(result => {
+            video.srcObject = result;
+        }).catch(err => console.log(err));
         document.addEventListener('keydown',function(e){
             console.log(e.keyCode);
             var charCode = e.charCode || e.keyCode || e.which;
@@ -103,26 +97,20 @@ export default {
                 upload:true,
                 socketId: $.socketId,
             });
-            // ss.on("host-leave",() => {
-            //     console.log("hostleft")
-            //     if($.mediaRecorder&&!$.uploadEnded){
-            //         $.endUpload();
-            //     }
-            //     ss.disconnect();
-            //     this.$router.push("/");
-            // })
         });
     },
     methods:{
         isTestStartedFunc(){
             let $ = this;
             document.addEventListener('visibilitychange', function(){
-                console.log(document.visibilityState);
+                if(document.visibilityState === "hidden"){}
+                    $.endTest();
             });
             document.onkeypress = function(evt){console.log(evt)};
             document.documentElement.requestFullscreen().then(()=>{
                 $.isTestStarted = true;
                 $.startTest();
+                console.log('isteststarted',this.isTestStarted);
             }).catch(err => {
                 alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
             });
@@ -138,13 +126,20 @@ export default {
         },
         endTest(){
             this.testEnded = true;
-            console.log('khatam');
+            this.endUpload();
+            router.push("/");
+            let videoElem = document.querySelector("video");
+            const stream = videoElem.srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(function(track) {
+                track.stop();
+            });
+            videoElem.srcObject = null;
+            //API CALL HERE TO SUBMIT LOGS AND RESPONSES
         },
         handleDataAvailable(event) {
             let $ = this;
-            console.log("data-available");
             if (event.data.size > 0) {
-                console.log(this.socket.connected);
                 if(this.socket.connected){
                 this.socket.emit("data_available", {
                     methodName: "proctoring",
@@ -192,18 +187,17 @@ export default {
         },
         startTest(){
             let $ = this;
+            $.isLoading = true;
             const hdConstraints = {
                 video: true
             };
             const video = document.querySelector('video');
             Promise.all([
-                navigator.mediaDevices.getUserMedia(hdConstraints),
                 faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh),
                 cocoSsd.load()
             ]).then(result => {
-                video.srcObject = result[0];
                 const facePredict = async () => {
-                    const predictions = await result[1].estimateFaces({
+                    const predictions = await result[0].estimateFaces({
                         input: document.querySelector("video")
                     });
                     if(!predictions.length) return {lookedAway:true,numberOfPeople:predictions.length,confidence:0};
@@ -228,7 +222,7 @@ export default {
                     return {lookedAway,numberOfPeople:predictions.length,confidence:predictions[0].faceInViewConfidence};
                 }
                 const mobilePredict = async () => {
-                    const predictions = await result[2].detect(document.querySelector("video"));
+                    const predictions = await result[1].detect(document.querySelector("video"));
                     return {mobile:predictions.some(prediction => prediction.class === 'cell phone')};
                 }
                 const predict = () => {
@@ -262,14 +256,12 @@ export default {
                     $.mediaRecorder = mediaRecorder;
                     $.mediaRecorder.start(1000);
                     $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
-                    console.log($.mediaRecorder);
                     startPrediction();
                     setInterval(()=>{
                         $.time += 1;
-                        console.log($.logs);
                     }, 60*1000);
                 };
-                this.isLoading = false;
+                $.isLoading = false;
             }).catch(err => console.log(err));
         },
     }
