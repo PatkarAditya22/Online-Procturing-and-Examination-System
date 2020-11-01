@@ -134,7 +134,7 @@ export default {
                 if(document.visibilityState === "hidden"){
                     $.endTest();
                     $.flagged = true;
-                    $.reaseon = "User tried to switch tabs";
+                    $.reason = "User tried to switch tabs";
                 }
             });
             document.onkeypress = function(evt){console.log(evt)};
