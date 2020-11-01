@@ -58,6 +58,7 @@
             <div v-if="response.flagged">Flagged due to {{response.reason}}</div>
             Answers {{ response.answers }}<br>
             CandidateIntigrityScore {{Math.random() * 100}}<br>
+            <video :src="'https://agoraintegration.s3.ap-south-1.amazonaws.com/proctoring/'+test._id+'/'+response.userId+'.webm'"/>
             <div v-for="(log,index) in Object.entries(response.logs)" :key="index">      
                 <div>
                     <table class="table table-striped">
