@@ -180,7 +180,7 @@ export default {
             const tokenBody = jwt.decode(token);
             console.log(tokenBody);
             const body = {
-                user: tokenBody.id,
+                userId: tokenBody.id,
                 logs: this.logs,
                 answers: answers,
                 testStartedAt: this.startedAt,

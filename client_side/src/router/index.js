@@ -15,7 +15,7 @@ import UserList from '../components/org/pages/UserList.vue';
 function protector(expectedRole, safeRouteName) {
     return async function (to, from, next) {
         console.log('inside the protector');
-		let role = JSON.parse(localStorage.getItem('user')).role;
+		// let role = JSON.parse(localStorage.getItem('user')).role;
 		next();
         // if(role === expectedRole) {
         //     next()

@@ -1,10 +1,65 @@
 <template>
     <div class="container">
         <div>
-            {{ test }}
+            OrganizationID : {{ test.orgId }}
         </div>
-        <div v-for="(user,index) in users" :key="index">
-
+        <div>
+            TestName : {{ test.testName }}
+        </div>
+        <h1>Settings</h1>
+        <div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                    <th scope="col">Test Duration</th>
+                    <th scope="col">Disabled Tab change</th>
+                    <th scope="col">Enable Full screen</th>
+                    <th scope="col">Severity</th>
+                    <th scope="col">Maximum marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     <tr>
+                    <th scope="row">{{test.settings.testDuration}}</th>
+                    <td>{{test.settings.disabledFullScreen}}</td>
+                    <td>{{test.settings.enabledFullScreen}}</td>
+                    <td>{{test.settings.severity}}</td>
+                    <td>{{test.settings.totalScore}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h3>Questions inlcuded in this test</h3>
+        <div>
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                    <th scope="col">Question</th>
+                    <th scope="col">Question type</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(question,index) in test.questions" :key="index">
+                    <th scope="row">{{question.questionText}}</th>
+                    <td>{{question.qType}}</td>
+                    <td>{{question.score}}</td>
+                    <td>{{question.options}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h1>Responses</h1>
+        <hr/>
+        <div v-for="(response,index) in test.responses" :key="index">
+            StartedAt {{response.testStartedAt}}<br/>
+            EndedAt {{response.testEndedAt}}<br/>
+            <div v-if="response.flagged">Flagged due to {{response.reason}}</div>
+            Answers {{ response.answers }}<br>
+            Score 10<br>
+            <video :src="'https://agoraintegration.s3.ap-south-1.amazonaws.com/proctoring/'+test._id+'/'+response.userId+'.webm'"/>
+            <hr/>
         </div>
     </div>
 </template>
