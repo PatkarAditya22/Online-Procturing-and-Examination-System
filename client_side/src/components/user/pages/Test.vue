@@ -6,7 +6,13 @@
             </div>
         </div>
         <div> 
-            <div v-if="isTestStarted && !testEnded" class="row">
+            <div class="m-3 w-100 text-danger" style="text-align:center;position:relative;">
+                <hr>
+                <h5 class="text-secondary">All warnings will be displayed here</h5>
+                <h3>{{ warning }}</h3>
+            </div>
+            <div v-if="isTestStarted && !testEnded" class="row" style="z-index: -1">
+                
                 <div class="col-md-10">
                     <base-card v-for="(question,index) in test.questions" :key="index" style="width: 100%;" class="p-3 m-3">
                         <div>
@@ -19,7 +25,7 @@
                                 </div>
                             </div>
                             <div v-else-if="question.qType=='multiple'">
-                                <div v-for="(option,index) in question.options" :key="index">
+                                <div v-for="(option,oindex) in question.options" :key="oindex">
                                     <input type="checkbox" :name="question.questionText" id="" v-model="question.answer" :value="option"> {{ option }}
                                 </div>
                             </div>
@@ -34,7 +40,6 @@
             <div v-else-if="!testEnded">
                 <div @click="isTestStartedFunc" class="btn btn-primary mx-3"> Start Test</div>
             </div>
-            {{warning}}
             <div class="col-md-4">
                 <video autoplay class="float"/>
             </div>
@@ -73,9 +78,12 @@ export default {
             reason: null,
             startedAt: null,
             endedAt: null,
-            warning: "All good",
+            warning: "",
             stream:null,
-            userId:null
+            userId:null,
+            timeInterval:null,
+            beep:null,
+            continuousFlags:0
         }
     },
     created(){
@@ -87,7 +95,11 @@ export default {
         this.questions = [...this.test.questions];
 
         this.questions = this.questions.map(question => {
-            question.answer = null;
+            if(question.qType === 'single')
+                question.answer = '';
+            else if(question.qType === 'multiple')
+                question.answer = [];
+            else question.answer = '';
             return question;
         });
         // console.log(this.questions);      
@@ -126,6 +138,11 @@ export default {
                 socketId: $.socketId,
             });
         });
+        const context = new AudioContext()
+        const beep = context.createOscillator()
+        beep.type = "sine";
+        beep.connect(context.destination);
+        this.beep = beep;
     },
     methods:{
         isTestStartedFunc(){
@@ -157,6 +174,7 @@ export default {
             return Math.pow(Math.pow(sumX,2)+Math.pow(sumY,2),0.5)
         },
         async endTest(){
+            document.exitFullscreen()
             console.log(this.questions);
             this.endedAt = new Date();
             this.testEnded = true;
@@ -165,13 +183,10 @@ export default {
             } catch(err){
                 console.log(err);
             }
-            // let videoElem = document.querySelector("video");
-            // const stream = videoElem.srcObject;
-            // const tracks = stream.getTracks();
-            // tracks.forEach(function(track) {
-            //     track.stop();
-            // });
-            // videoElem.srcObject = null;
+            this.stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+            clearInterval(this.timeInterval);
             const answers = this.questions.map(q => {
                 return q.answer;
             })
@@ -225,21 +240,7 @@ export default {
                 socketId: $.socketId,
                 upload:true,
                 socketId: $.socketId 
-            }); 
-            if(this.videoRecordingStream){
-                const tracks = this.videoRecordingStream.getTracks();
-                tracks.forEach(function(track) {
-                track.stop();
-                });
-                this.videoRecordingStream = null;
-            }
-            if(this.screenRecordingStream){
-                const tracks = this.screenRecordingStream.getTracks();
-                tracks.forEach(function(track) {
-                track.stop();
-                });
-                this.screenRecordingStream = null;
-            }
+            });
         },
         startTest(){
             let $ = this;
@@ -297,13 +298,22 @@ export default {
                     this.logs[this.time][1] += result.numberOfPeople>1?1:0;
                     this.logs[this.time][2] += result.confidence<0.8?1:0;
                     this.logs[this.time][3] += result.mobile?1:0;
-                    if(result.lookedAway||result.confidence<0.8) $.warning = 'Please look the screen';
-                    else $.warning = 'All good';
-                    if(result.mobile) $.warning += 'Using Mobile is not Allowed';
-                    else $.warning += 'All good';
-                    if(result.numberOfPeople>1) $.warning += 'More than 1 people';
-                    else $.warning += 'All good';
-                    console.log(result);
+                    if(result.lookedAway||result.confidence<0.8) $.warning = 'Please look the screen ';
+                    else $.warning = '';
+                    if(result.mobile) $.warning += 'Using Mobile is not Allowed ';
+                    else $.warning += '';
+                    if(result.numberOfPeople>1) $.warning += 'More than 1 people ';
+                    else $.warning += '';
+                    // if(result.lookedAway ||  result.numberOfPeople>1 ||  result.confidence<0.8 || result.mobile){
+                    //     $.continuousFlags += 1;
+                    // } else {
+                    //     $.continuousFlags = 0;
+                    // }
+                    // if($.continuousFlags>25){
+                    //     $.beep.start();
+                    // }else{
+                    //     $.beep.stop();
+                    // }
                     if(!this.testEnded)requestAnimationFrame(startPrediction);
                 }
                 let ss = $.socket;
@@ -318,7 +328,7 @@ export default {
                 $.mediaRecorder = mediaRecorder;
                 $.mediaRecorder.start(1000);
                 $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
-                setInterval(()=>{
+                $.timeInterval = setInterval(()=>{
                     $.time += 1;
                 }, 60*1000);
                 startPrediction();

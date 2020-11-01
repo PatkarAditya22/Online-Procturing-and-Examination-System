@@ -81,27 +81,43 @@
                             </label>
                         </div>
                     </div>
-                    <div style="display:flex;">
-                        <label style="margin:10px;" for="inputEmail3">Total Score</label>
-                        <input style="margin:10px;width:100px" type="text" class="form-control" id="inputEmail3" v-model.number="test.settings.totalScore">
-                    </div>
                     <div class="col-md-4">
                         <input type="file" accept=".csv" ref="file" @change="uploadFile"/>
                     </div>
                     <br>
-                    <!-- <div class="col-md-4">
+                    <div class="col-md-4">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
                             <label class="form-check-label" for="defaultCheck1">
-                                Default checkbox
+                                Neck Movement
                             </label>
                         </div>
-                    </div> -->
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+                            <label class="form-check-label" for="defaultCheck1">
+                                Mobile detection
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+                            <label class="form-check-label" for="defaultCheck1">
+                                Multiple person detection
+                            </label>
+                        </div>
+                    </div>
                     <div class="col-md-4">
                         <select style="width:200px" class="custom-select" v-model="test.settings.severity">
                             <option value="strict" selected>Strict</option>
                             <option value="moderate">Moderate</option>
                         </select>
+                    </div>
+                    <div style="display:flex;">
+                        <label style="margin:10px;" for="inputEmail3">Total Score</label>
+                        <input style="margin:10px;width:100px" type="text" class="form-control" id="inputEmail3" v-model.number="test.settings.totalScore">
                     </div>
                     <br>
                     <div class="col-md-4">
