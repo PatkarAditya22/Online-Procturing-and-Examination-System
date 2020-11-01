@@ -43,5 +43,12 @@ export default {
     getAllUserTests(){
         const response = Api().get('user/get_all_tests');
         return response;
+    },
+    submitTest(userId,testId,body){
+        const response = Api().post(
+            `user/${userId}/test/${testId}`,
+            body
+        );
+        return response;
     }
 }

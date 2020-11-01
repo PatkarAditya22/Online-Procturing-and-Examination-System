@@ -59,9 +59,9 @@ export default {
             });
             console.log(response);
             this.$store.commit('setUser',{
-                user: response.user
+                user: response.data.user
             });
-            localStorage.setItem("token",response.token);
+            localStorage.setItem("token",response.data.token);
             this.$store.commit('setAuthentication', { isAuthenticated: true });
             this.$store.commit('setRole',{ role: 'user' });
             this.$router.replace('/user/home');

@@ -82,7 +82,7 @@
                         </div>
                     </div>
                     <div style="display:flex;">
-                        <label style="margin:10px;" for="inputEmail3">Toat Score</label>
+                        <label style="margin:10px;" for="inputEmail3">Total Score</label>
                         <input style="margin:10px;width:100px" type="text" class="form-control" id="inputEmail3" v-model.number="test.settings.totalScore">
                     </div>
                     <div class="col-md-4">

@@ -1,99 +1,43 @@
 <template>
-<<<<<<< Updated upstream
     <div>
         <div v-if="isLoading">
-            <div class="spinner-border text-primary" role="status">
+            <div class="spinner-border text-primary loading" role="status">
                 <span class="sr-only">Loading...</span>
-||||||| merged common ancestors
-    <div> 
-        <div v-if="isTestStarted && !testEnded" class="row">
-            <div class="col-md-6">
-                <base-card v-for="(question,index) in test" :key="index" style="width: 18rem;">
-                    <div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ question.questionText }}</h5>
-                        </div>
-                        <div v-if="question.type=='single'">
-                            <ul class="list-group list-group-flush" v-for="(option,index) in question.options" :key="index">
-                            <li class="list-group-item">{{ option }}</li>
-                        </ul>
-                        </div>
-                        <div v-else>
-                            <textarea name="" id="" cols="10" rows="5"></textarea>
-                        </div>
-                    </div>
-                </base-card>
-=======
-    <div> 
-        <div v-if="isTestStarted && !testEnded" class="row">
-            <div class="col-md-10 w-100">
-                <base-card v-for="(question,index) in test.questions" :key="index" style="width: 18rem;">
-                    <div>
-                        <div class="card-body">
-                            <h5 class="card-title">Q. {{ question.questionText }}</h5>
-                        </div>
-                        <div v-if="question.qType=='single'">
-                            <div v-for="(option,index) in question.options" :key="index">
-                                <input type="radio" name="" id=""> {{ option }}
-                            </div>
-                        </div>
-                        <div v-else-if="question.qType=='multiple'">
-                            <div v-for="(option,index) in question.options" :key="index">
-                                <input type="checkbox" name="" id=""> {{ option }}
-                            </div>
-                        </div>
-                        <div v-else>
-                            <textarea name="" id="" cols="60" rows="30"></textarea>
-                        </div>
-                    </div>
-                </base-card>
->>>>>>> Stashed changes
             </div>
         </div>
-<<<<<<< Updated upstream
         <div> 
             <div v-if="isTestStarted && !testEnded" class="row">
-                <div class="col-md-6">
-                    <base-card v-for="(question,index) in test" :key="index" style="width: 18rem;">
+                <div class="col-md-10">
+                    <base-card v-for="(question,index) in test.questions" :key="index" style="width: 100%;" class="p-3 m-3">
                         <div>
                             <div class="card-body">
-                                <h5 class="card-title">{{ question.questionText }}</h5>
+                                <h5 class="card-title">Q.{{ index + 1 }} {{ question.questionText }}</h5>
                             </div>
-                            <div v-if="question.type=='single'">
-                                <ul class="list-group list-group-flush" v-for="(option,index) in question.options" :key="index">
-                                <li class="list-group-item">{{ option }}</li>
-                            </ul>
+                            <div v-if="question.qType=='single'">
+                                <div v-for="(option,index) in question.options" :key="index">
+                                    <input type="radio" :name="question.questionText" id="" v-model="question.answer" :value="option"> {{ option }}
+                                </div>
+                            </div>
+                            <div v-else-if="question.qType=='multiple'">
+                                <div v-for="(option,index) in question.options" :key="index">
+                                    <input type="checkbox" :name="question.questionText" id="" v-model="question.answer" :value="option"> {{ option }}
+                                </div>
                             </div>
                             <div v-else>
-                                <textarea name="" id="" cols="10" rows="5"></textarea>
+                                <textarea name="" id="" cols="60" rows="5"  v-model.trim="question.answer"></textarea>
                             </div>
                         </div>
                     </base-card>
-                    <div @click="endTest">Submit Test</div>
+                    <div @click="endTest" class="btn btn-danger mx-3">Submit Test</div>
                 </div>
             </div>
             <div v-else-if="!testEnded">
-                <div @click="isTestStartedFunc"> Start Test</div>
+                <div @click="isTestStartedFunc" class="btn btn-primary mx-3"> Start Test</div>
             </div>
+            {{warning}}
             <div class="col-md-4">
                 <video autoplay class="float"/>
             </div>
-||||||| merged common ancestors
-        <div>
-            <div @click="isTestStartedFunc"> Start Test</div>
-            <div @click="endUpload">End Upload</div>
-        </div>
-        <div class="col-md-4">
-            <video autoplay class="float"/>
-        </div>
-=======
-        <div>
-            <div @click="isTestStartedFunc"> Start Test</div>
-        </div>
-        <div class="col-md-4">
-            <video autoplay class="float"/>
-        </div>
->>>>>>> Stashed changes
         </div>
     </div>
 </template>
@@ -104,6 +48,8 @@ import "@tensorflow/tfjs-backend-webgl";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 import io from "socket.io-client";
+import Api from '../../../utils/api';
+import jwt from 'jsonwebtoken';
 
 export default {
     props: ['testId'],
@@ -114,6 +60,7 @@ export default {
         return {
             time:0,
             test: null,
+            questions: null,
             testEnded:false,
             result: null,
             isLoading:false,
@@ -121,71 +68,42 @@ export default {
             redFlags: 3,
             socketId: null,
             mediaRecorder: null,
-            logs:{}
+            logs:{},
+            flagged: false,
+            reason: null,
+            startedAt: null,
+            endedAt: null,
+            warning: "All good",
+            stream:null,
+            userId:null
         }
     },
     created(){
         let all_tests = this.$store.getters.getUserTests;
         this.test = all_tests.filter(test =>{
             return test._id === this.testId;
-<<<<<<< Updated upstream
-        })
-        console.log(this.test);      
-||||||| merged common ancestors
-        })
-        console.log(this.test);
-        // this.test = [
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [0],
-        //         type: 'single'
-        //     },
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [2],
-        //         type: 'single'
-        //     },
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [1],
-        //         type: 'text'
-        //     },
-        // ];        
-=======
+        })[0];
+        
+        this.questions = [...this.test.questions];
+
+        this.questions = this.questions.map(question => {
+            question.answer = null;
+            return question;
         });
-        console.log(this.test);
-        // this.test = [
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [0],
-        //         type: 'single'
-        //     },
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [2],
-        //         type: 'single'
-        //     },
-        //     {
-        //         questionText: "How are you?",
-        //         options: ['fine','good','great'],
-        //         correctOptions: [1],
-        //         type: 'text'
-        //     },
-        // ];        
->>>>>>> Stashed changes
+        // console.log(this.questions);      
     },
     mounted(){
+        const token = localStorage.getItem('token').split(' ')[1];
+        const tokenBody = jwt.decode(token);
+        console.log(tokenBody);
+        this.userId = tokenBody.id;
         const hdConstraints = {
             video: true
         };
         const video = document.querySelector('video');
         navigator.mediaDevices.getUserMedia(hdConstraints).then(result => {
             video.srcObject = result;
+            this.stream = result;
         }).catch(err => console.log(err));
         document.addEventListener('keydown',function(e){
             console.log(e.keyCode);
@@ -195,15 +113,16 @@ export default {
                 return false;
             }
         });
-        this.socket = io("http://152.67.10.242/server/stream");
+        this.socket = io("http://crazyforms.herokuapp.com/stream");
         let $ = this;
         let ss = this.socket;
         ss.on("connect", () => {
             $.socketId = ss.io.engine.id;
             ss.emit("subscribe", {
-                testId: $.test.testId,
+                methodName: "proctoring",
+                room: $.test._id,
                 userId: $.userId,
-                upload: true,
+                upload:true,
                 socketId: $.socketId,
             });
         });
@@ -212,14 +131,18 @@ export default {
         isTestStartedFunc(){
             let $ = this;
             document.addEventListener('visibilitychange', function(){
-                if(document.visibilityState === "hidden"){}
+                if(document.visibilityState === "hidden"){
                     $.endTest();
+                    $.flagged = true;
+                    $.reaseon = "User tried to switch tabs";
+                }
             });
             document.onkeypress = function(evt){console.log(evt)};
             document.documentElement.requestFullscreen().then(()=>{
                 $.isTestStarted = true;
                 $.startTest();
                 console.log('isteststarted',this.isTestStarted);
+                this.startedAt = new Date();
             }).catch(err => {
                 alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
             });
@@ -233,17 +156,41 @@ export default {
             })
             return Math.pow(Math.pow(sumX,2)+Math.pow(sumY,2),0.5)
         },
-        endTest(){
+        async endTest(){
+            console.log(this.questions);
+            this.endedAt = new Date();
             this.testEnded = true;
-            this.endUpload();
-            router.push("/");
-            let videoElem = document.querySelector("video");
-            const stream = videoElem.srcObject;
-            const tracks = stream.getTracks();
-            tracks.forEach(function(track) {
-                track.stop();
-            });
-            videoElem.srcObject = null;
+            try{
+                this.endUpload();
+            } catch(err){
+                console.log(err);
+            }
+            // let videoElem = document.querySelector("video");
+            // const stream = videoElem.srcObject;
+            // const tracks = stream.getTracks();
+            // tracks.forEach(function(track) {
+            //     track.stop();
+            // });
+            // videoElem.srcObject = null;
+            const answers = this.questions.map(q => {
+                return q.answer;
+            })
+            const token = localStorage.getItem('token').split(' ')[1];
+            console.log(token);
+            const tokenBody = jwt.decode(token);
+            console.log(tokenBody);
+            const body = {
+                user: tokenBody.id,
+                logs: this.logs,
+                answers: answers,
+                testStartedAt: this.startedAt,
+                testCompletedAt: this.endedAt,
+                flagged: this.flagged,
+                reason: this.reason
+            }
+            const response = await Api.submitTest(body.userId,this.test._id,body);
+            console.log(response);
+            this.$router.push("/");
             //API CALL HERE TO SUBMIT LOGS AND RESPONSES
         },
         handleDataAvailable(event) {
@@ -251,10 +198,11 @@ export default {
             if (event.data.size > 0) {
                 if(this.socket.connected){
                 this.socket.emit("data_available", {
-                    testId: $.test.testId,
+                    methodName: "proctoring",
+                    room: $.test._id,
                     userId: $.userId,
-                    upload: true,
                     socketId: $.socketId,
+                    upload:true,
                     chunk: event.data
                 });
                 } else {
@@ -271,9 +219,11 @@ export default {
             this.mediaRecorder.stop();
             this.uploadEnded = true;
             this.socket.emit("leave-upload", {
-                testId: $.test.testId,
+                methodName: "proctoring",
+                room: $.test._id,
                 userId: $.userId,
-                upload: true,
+                socketId: $.socketId,
+                upload:true,
                 socketId: $.socketId 
             }); 
             if(this.videoRecordingStream){
@@ -347,36 +297,31 @@ export default {
                     this.logs[this.time][1] += result.numberOfPeople>1?1:0;
                     this.logs[this.time][2] += result.confidence<0.8?1:0;
                     this.logs[this.time][3] += result.mobile?1:0;
+                    if(result.lookedAway||result.confidence<0.8) $.warning = 'Please look the screen';
+                    else $.warning = 'All good';
+                    if(result.mobile) $.warning += 'Using Mobile is not Allowed';
+                    else $.warning += 'All good';
+                    if(result.numberOfPeople>1) $.warning += 'More than 1 people';
+                    else $.warning += 'All good';
+                    console.log(result);
                     if(!this.testEnded)requestAnimationFrame(startPrediction);
                 }
-                video.onloadeddata = () => {
-                    let ss = $.socket;
-                    ss.emit("subscribe-upload", {
-                        testId: $.testId,
-                        userId: $.userId,
-                        upload: true,
-                        socketId: $.socketId 
-                    });
-<<<<<<< Updated upstream
-                    let mediaRecorder = new MediaRecorder(result[0]);
-                    $.mediaRecorder = mediaRecorder;
-                    $.mediaRecorder.start(1000);
-                    $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
-||||||| merged common ancestors
-                    let mediaRecorder = new MediaRecorder(result[0]);
-                    $.mediaRecorder = mediaRecorder;
-                    $.mediaRecorder.start(1000);
-                    $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
-                    console.log($.mediaRecorder);
-=======
-                    let mediaRecorder = new MediaRecorder(video.captureStream(25),{mimeType: "video/webm; codecs=vp9"});
-                    mediaRecorder.ondataavailable = this.handleDataAvailable;
->>>>>>> Stashed changes
-                    startPrediction();
-                    setInterval(()=>{
-                        $.time += 1;
-                    }, 60*1000);
-                };
+                let ss = $.socket;
+                ss.emit("subscribe-upload", {
+                    methodName: "proctoring",
+                    room: $.test._id,
+                    userId: $.userId,
+                    socketId: $.socketId, 
+                    upload:true
+                });
+                let mediaRecorder = new MediaRecorder($.stream);
+                $.mediaRecorder = mediaRecorder;
+                $.mediaRecorder.start(1000);
+                $.mediaRecorder.ondataavailable = (event)=>$.handleDataAvailable(event);
+                setInterval(()=>{
+                    $.time += 1;
+                }, 60*1000);
+                startPrediction();
                 $.isLoading = false;
             }).catch(err => console.log(err));
         },
@@ -397,5 +342,17 @@ export default {
     font-size:30px;
 	box-shadow: 2px 2px 3px #999;
     z-index:100;
+}
+.loading {
+    position: fixed;
+    z-index: 999;
+    height: 2em;
+    width: 2em;
+    overflow: visible;
+    margin: auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
 </style>

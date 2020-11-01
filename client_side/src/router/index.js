@@ -10,6 +10,7 @@ import FaceRecognition from '../components/user/pages/FaceRecognition';
 import AudioRecognition from '../components/user/pages/AudioRecognition';
 import UserHome from '../components/user/pages/Home.vue';
 import OrgHome from '../components/org/pages/Home.vue';
+import UserList from '../components/org/pages/UserList.vue';
 
 function protector(expectedRole, safeRouteName) {
     return async function (to, from, next) {
@@ -42,6 +43,7 @@ const router = createRouter({
 		{ path: '/org/home', component:OrgHome,beforeEnter: protector("org", "orgLogin"),},
 		{ path: '/org/create_test', component: CreateTest,beforeEnter: protector("org", "orgLogin"),},
         { path: '/org/test/:testId', component: null,beforeEnter: protector("org", "orgLogin"), props: true},
+        { path: '/org/test/:testId/summary', component: UserList,beforeEnter: protector("org", "orgLogin"), props: true},
         { path: '/faceRecognition', component: FaceRecognition, props: true},
         { path: '/audioRecognition', component: AudioRecognition, props: true},
     ]

@@ -1,7 +1,11 @@
 <template>
     <div class="container mx-auto mt-3">
         <div>
-            hello
+            <button class="btn btn-primary" @click="newTest">
+                New test
+            </button>
+        </div>
+        <div>
             <div v-for="test in tests" :key="test._id">
                 <base-card class="p-3">
                     <div class="row">
@@ -23,7 +27,7 @@
 <script>
 import Api from '../../../utils/api';
 export default {
-    date(){
+    data(){
         return {
             tests: null,
         }
@@ -31,14 +35,17 @@ export default {
     methods : {
         nextPage(testId){
             this.$router.push(`/org/test/${testId}/summary`)
+        },
+        newTest(){
+            this.$router.push('/org/create_test');
         }
     },
-    async created(){
+    async mounted(){
         const response = await Api.getAllTests();
         this.tests = response.data.tests;
-        this.$store.commit('setTests',{ test: this.tests});
+        this.$store.commit('setTests',{ tests: this.tests});
+        // console.log(this.$store.getters.getTests);
         console.log(this.tests);
-        console.log(this.tests[0].testName);
     }
 }
 </script>
