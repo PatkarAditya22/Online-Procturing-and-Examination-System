@@ -1,0 +1,9 @@
+compiled
+node_modules
+server/node_modules
+client_side/node_modules
+package-lock.json
+.env
+server/.env
+env
+yarn.lock
