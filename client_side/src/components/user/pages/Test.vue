@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div v-if="isLoading">
+        <base-spinner :show="isLoading">
             <div class="spinner-border text-primary loading" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
-        </div>
+        </base-spinner>
         <div> 
             <div class="m-3 w-100 text-danger" style="text-align:center;position:relative;">
                 <hr>
