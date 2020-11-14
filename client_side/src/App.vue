@@ -1,8 +1,10 @@
 <template>
     <div>
-        <user-bar v-if="isUser"></user-bar>
-        <router-view v-else-if="this.$route.path=='/'"></router-view>
-        <org-bar v-else></org-bar>
+        <div v-if="this.$route.path !== '/'">
+          	<user-bar v-if="isUser"></user-bar>
+          	<org-bar v-else></org-bar>
+        </div>
+        <router-view></router-view>
     </div>
 </template>
 

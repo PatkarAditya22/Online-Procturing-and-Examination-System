@@ -30,15 +30,15 @@
         <div class="row" style="text-align:center;background-color:#2F5496">
             <div class="col-md-4" style="margin-top:20px;color:white">
                 <img style="border-radius:50%;width:200px;height:150px;" src="../assets/2.jpg" alt="">
-                <p>We offer You a proctoring platform as well as an examination portal where you can create tests!</p>
+                <p>We offer you a proctoring platform as well as an examination portal where you can create exams!</p>
             </div>
             <div class="col-md-4" style="margin-top:20px;color:white">
                 <img style="border-radius:50%;width:200px;height:150px;" src="../assets/3.jpg" alt="">
-                <p>We check for various fraud detection namely Tab change,Full screen mode,Iris and neck movement and object detection.</p>
+                <p>We check for various fraud detection methods namely Browser Tab Change, Full screen mode, Iris and neck movement, mobile and multi-person detection.</p>
             </div>
             <div class="col-md-4" style="margin-top:20px;color:white">
                 <img style="border-radius:50%;width:200px;height:150px;" src="../assets/4.png" alt="">
-                <p>We offer You a reason of being flagged along with complete logs and a video of your test uploaded on AWS</p>
+                <p>We offer you a reason for being flagged along with complete logs and a video of your test uploaded on AWS</p>
             </div>
         </div>
     </div>
