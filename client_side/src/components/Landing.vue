@@ -1,21 +1,37 @@
-<template>
+    <template>
     <div>
         <nav class="navbar navbar-expand-lg navbar navbar-dark bg-dark">
-            <a class="navbar-brand" href="#">Online Procturing Platform</a>
+            <a class="navbar-brand" href="#">Online Proctoring Platform</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
+                <li class="nav-item active m-2">
                     <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Login</a>
+                <li class="nav-item m-2">
+                    <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle bg-dark" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Login
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#"><router-link to="/user/login">User</router-link></a>
+                        <a class="dropdown-item" href="#"><router-link to="/org/login">Organization</router-link></a>
+                    </div>
+                    </div>
                 </li>
-                    <li class="nav-item">
-                    <a class="nav-link" href="#">Register</a>
+                    <li class="nav-item m-2">
+                    <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle bg-dark" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Register
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#"><router-link to="/user/register">User</router-link></a>
+                        <a class="dropdown-item" href="#"><router-link to="/org/register">Organization</router-link></a>
+                    </div>
+                    </div>
                 </li>
                 </ul>
                 <form class="form-inline my-2 my-lg-0">
