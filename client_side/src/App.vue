@@ -1,8 +1,8 @@
 <template>
     <div>
         <user-bar v-if="isUser"></user-bar>
+        <router-view v-else-if="this.$route.path=='/'"></router-view>
         <org-bar v-else></org-bar>
-        <router-view></router-view>
     </div>
 </template>
 
