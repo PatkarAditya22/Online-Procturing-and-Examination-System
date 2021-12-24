@@ -1,24 +1,24 @@
-const User =  require('../../models/User');
+const User = require('../../models/User');
 const Test = require('../../models/Test');
-const {getIdFromHeader} = require('../../helpers');
+const { getIdFromHeader } = require('../../helpers');
 const jwt = require('jsonwebtoken');
-const uploadToBucket = require('../../helpers/bucket');
+// const uploadToBucket = require('../../helpers/bucket');
 
 const signup = async (req, res, next) => {
 	try {
-		
-		const user = await User.findOne({email:req.body.email});
-		if(user){
+
+		const user = await User.findOne({ email: req.body.email });
+		if (user) {
 			return res.status(400).json({
 				message: "Sorry, that email and/or contact number is already registered"
 			});
 		}
-	//	const uniqueId = uuidv4();
-		const usernew = await User.create({...req.body});
+		//	const uniqueId = uuidv4();
+		const usernew = await User.create({ ...req.body });
 		const { id, name } = usernew;
 		const fileName = `${name}-${id}`;
-		uploadToBucket(req.file['path'],fileName);
-		usernew.idProof=`https://objectstorage.ap-mumbai-1.oraclecloud.com/n/bmuguxlyea8m/b/proctor-bucket/o/${fileName}`
+		// uploadToBucket(req.file['path'],fileName);
+		// usernew.idProof=`https://objectstorage.ap-mumbai-1.oraclecloud.com/n/bmuguxlyea8m/b/proctor-bucket/o/${fileName}`
 		usernew.save()
 		const token = jwt.sign(
 			{
